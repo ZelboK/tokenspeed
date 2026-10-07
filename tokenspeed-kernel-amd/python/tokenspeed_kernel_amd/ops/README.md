@@ -707,6 +707,12 @@ The row tile is resolved from the gathered row count and expert count unless
 the caller pins it. Ragged M and N edges are masked rather than peeled, so a
 trailing partial tile loads only the rows that exist.
 
+The large-batch router counts expert assignments in groups of at most 256
+experts, using four warps in the counting stage. This reduces LDS atomic
+contention when routing across many experts. The remaining routing stages
+retain their existing launch geometry and metadata format; duplicate expert
+IDs are counted separately, and invalid IDs are excluded from every group.
+
 ### Causal MLA verification on gfx950
 
 `gluon_mla_decode_fp8_query_blocks_gfx950` decodes 2–16 causal queries per
