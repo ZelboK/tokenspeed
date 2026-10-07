@@ -525,7 +525,7 @@ def _assert_gfx1250_large_route(
 
 @pytest.mark.parametrize(
     ("tokens", "topk", "experts"),
-    [(37, 7, 11), (1024, 16, 896), (8192, 16, 896)],
+    [(37, 7, 11), (1024, 16, 257), (1024, 16, 896), (8192, 16, 896)],
 )
 def test_gfx1250_large_m_route_handles_duplicates_invalid_ids_and_block64(
     tokens: int, topk: int, experts: int

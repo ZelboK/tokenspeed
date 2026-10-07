@@ -709,9 +709,11 @@ trailing partial tile loads only the rows that exist.
 
 The large-batch router counts expert assignments in groups of at most 256
 experts, using four warps in the counting stage. This reduces LDS atomic
-contention when routing across many experts. The remaining routing stages
-retain their existing launch geometry and metadata format; duplicate expert
-IDs are counted separately, and invalid IDs are excluded from every group.
+contention when routing across many experts. Duplicate expert IDs are counted
+separately, and invalid IDs are excluded from every group.
+The subsequent prefix scan processes eight adjacent experts per four-warp
+block, coalescing accesses to the row-major chunk-count buffer. Each expert
+retains an independent scan over chunks; partial expert groups are masked.
 
 ### Causal MLA verification on gfx950
 
