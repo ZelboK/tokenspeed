@@ -225,10 +225,18 @@ def _load_key_tile(
     IS_PREFILL: gl.constexpr,
     USE_BUFFER: gl.constexpr,
 ):
-    packed_dims = gl.arange(0, _PACKED_DIM, layout=gl.SliceLayout(1, dot_b_layout))[
-        :, None
+    if USE_BUFFER:
+        key_memory_layout: gl.constexpr = dot_b_layout
+    else:
+        key_memory_layout: gl.constexpr = gl.BlockedLayout(
+            [16, 1], [4, 8], [1, 4], [0, 1]
+        )
+    packed_dims = gl.arange(
+        0, _PACKED_DIM, layout=gl.SliceLayout(1, key_memory_layout)
+    )[:, None]
+    columns = gl.arange(0, _BLOCK_N, layout=gl.SliceLayout(0, key_memory_layout))[
+        None, :
     ]
-    columns = gl.arange(0, _BLOCK_N, layout=gl.SliceLayout(0, dot_b_layout))[None, :]
     positions = tile_start + columns
     valid = positions < candidate_end
     pages, page_rows, valid = _candidate_page_rows(
@@ -256,6 +264,11 @@ def _load_key_tile(
         0,
         USE_BUFFER,
     )
+
+    key = gl.convert_layout(key, dot_b_layout)
+    valid = gl.convert_layout(
+        valid.reshape([_BLOCK_N]), gl.SliceLayout(0, dot_b_layout)
+    )[None, :]
 
     scale_columns = gl.arange(0, _BLOCK_N, layout=gl.SliceLayout(1, b_scale_layout))[
         :, None

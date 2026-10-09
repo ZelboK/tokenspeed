@@ -751,3 +751,12 @@ probabilities by 256 before the E4M3 cast to preserve small weights, and
 divide out that factor at normalization. The projected-value API applies
 the existing value projection to the latent output. Graph replay reads
 updated page tables and lengths in place.
+
+### gfx1250 DSV4 MXFP4 indexer GLOBAL key loads
+
+The sparse indexer uses GLOBAL loads for cache views with a nonzero storage
+offset or a byte extent beyond the signed 32-bit buffer-offset range.
+For that path, packed keys load in contiguous groups of sixteen bytes and
+convert to the original WMMA operand layout before scoring. The buffer and
+TDM paths retain their existing layouts. Page validation, scale loads,
+head reductions, logits and top-k selection are unchanged.
